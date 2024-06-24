@@ -29,6 +29,6 @@ export class AuthService {
 
     const accessToken = await this.jwtService.signAsync({ id: target.id }, { secret: process.env.JWT_SECRET });
 
-    return accessToken;
+    return { accessToken };
   }
 }
