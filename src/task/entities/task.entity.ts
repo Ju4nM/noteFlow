@@ -13,9 +13,9 @@ export class Task {
   @Column({ default: false })
   isCompleted: boolean;
   
-  @OneToMany(type => Note, note => note.task)
-  notes: Note[];
+  @OneToMany(type => Note, note => note.task, { nullable: true })
+  notes?: Note[];
 
-  @ManyToOne(type => User, user => user.notes)
+  @ManyToOne(type => User, user => user.tasks)
   user: User;
 }

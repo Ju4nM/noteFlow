@@ -1,34 +1,47 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Put } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { Request } from 'express';
+import { Task } from './entities/task.entity';
 
 @Controller('task')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Post()
-  create(@Body() createTaskDto: CreateTaskDto) {
-    return this.taskService.create(createTaskDto);
+  async create(@Body() createTaskDto: CreateTaskDto, @Req() req: Request): Promise<Task> {
+    const { userId } = req.user as any;
+    return await this.taskService.create(createTaskDto, userId);
   }
 
   @Get()
-  findAll() {
-    return this.taskService.findAll();
+  async findAll(@Req() req: Request): Promise<Task[]> {
+    const { userId } = req.user as any;
+    return await this.taskService.findAll(userId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.taskService.findOne(+id);
+  async findOne(@Param('id') id: string, @Req() req: Request): Promise<Task> {
+    const { userId } = req.user as any;
+    return await this.taskService.findOne(id, userId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    return this.taskService.update(+id, updateTaskDto);
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto, @Req() req: Request): Promise<Task> {
+    const { userId } = req.user as any;
+    return await this.taskService.update(id, updateTaskDto, userId);
+  }
+
+  @Patch('/complete/:id')
+  async toggleComplete(@Param('id') id: string, @Req() req: Request): Promise<Task> {
+    const { userId } = req.user as any;
+    return await this.taskService.toggleComplete(id, userId);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.taskService.remove(+id);
+  async remove(@Param('id') id: string, @Req() req: Request): Promise<Task> {
+    const { userId } = req.user as any;
+    return await this.taskService.remove(id, userId);
   }
 }

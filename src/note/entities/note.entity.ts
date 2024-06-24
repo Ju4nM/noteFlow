@@ -14,8 +14,8 @@ export class Note {
   @Column()
   body: string;
 
-  @ManyToOne(type => Task, task => task.notes)
-  task: Task;
+  @ManyToOne(type => Task, task => task.notes, { nullable: true})
+  task?: Task;
 
   @ManyToOne(type => User, user => user.notes)
   user: User;

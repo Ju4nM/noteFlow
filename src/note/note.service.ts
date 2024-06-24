@@ -1,26 +1,65 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Note } from './entities/note.entity';
+import { Repository } from 'typeorm';
+import { UserService } from 'src/user/user.service';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class NoteService {
-  create(createNoteDto: CreateNoteDto) {
-    return 'This action adds a new note';
+  
+  constructor (
+    @InjectRepository(Note) private noteRepository: Repository<Note>,
+    private userService: UserService
+  ) {}
+
+  async create(createNoteDto: CreateNoteDto, userId: string): Promise<Note> {
+    const user: User = await this.userService.findOne(userId);
+    const newNote: Note = this.noteRepository.create({ ...createNoteDto, user });
+
+    return await this.noteRepository.save(newNote);
   }
 
-  findAll() {
-    return `This action returns all note`;
+  async findAll(userId: string): Promise<Note[]> {
+    const notes: Note[] = await this.noteRepository.find({
+      where: {
+        user: {
+          id: userId
+        }
+      }
+    });
+
+    return notes;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} note`;
+  async findOne(noteId: string, userId: string): Promise<Note> {
+    const note: Note = await this.noteRepository.findOne({
+      where: {
+        id: noteId,
+        user: {
+          id: userId
+        }
+      }
+    })
+
+    if (!note) throw new HttpException("No se encontro la nota", HttpStatus.NOT_FOUND);
+
+    return note;
   }
 
-  update(id: number, updateNoteDto: UpdateNoteDto) {
-    return `This action updates a #${id} note`;
+  async update(noteId: string, updateNoteDto: UpdateNoteDto, userId: string): Promise<Note> {
+    const target: Note = await this.findOne(noteId, userId);
+    const noteUpdated = this.noteRepository.merge(target, updateNoteDto);
+
+    return await this.noteRepository.save(noteUpdated);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} note`;
+  async remove(noteId: string, userId: string): Promise<Note> {
+    const target: Note = await this.findOne(noteId, userId);
+    await this.noteRepository.remove(target);
+
+    return target;
   }
 }

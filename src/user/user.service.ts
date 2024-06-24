@@ -1,4 +1,4 @@
-import { HttpCode, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,6 +12,15 @@ export class UserService {
   constructor (@InjectRepository(User) private userRepository: Repository<User>) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    
+    const user: User = await this.userRepository.findOne({
+      where: {
+        email: createUserDto.email
+      }
+    });
+
+    if (user) throw new HttpException("El correo ya se encuentra en uso", HttpStatus.CONFLICT);
+
     const hashedPassword = await hash(createUserDto.password, 10);
     const newUser = this.userRepository.create({ ...createUserDto, password: hashedPassword });
     return await this.userRepository.save(newUser);
@@ -21,26 +30,30 @@ export class UserService {
     return await this.userRepository.find();
   }
 
-  async findOne(id: string): Promise<User> {
+  async findOne(userId: string): Promise<User> {
     const target: User = await this.userRepository.findOne({
       where: {
-        id
+        id: userId
       }
     });
 
-    if (!target) throw new HttpException(null, HttpStatus.NOT_FOUND);
+    if (!target) throw new HttpException("Usuario no encontrado", HttpStatus.NOT_FOUND);
 
     return target;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const target = await this.findOne(id);
-    const userUpdated = this.userRepository.merge(target, updateUserDto);
-    return userUpdated;
+  async update(userId: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const target = await this.findOne(userId);
+    
+    if (updateUserDto.password) updateUserDto.password = await hash(updateUserDto.password, 10);
+
+    const userUpdated = this.userRepository.merge(target, { ...updateUserDto });
+
+    return await this.userRepository.save(userUpdated);
   }
 
-  async remove(id: string): Promise<User> {
-    const target = await this.findOne(id);
+  async remove(userId: string): Promise<User> {
+    const target = await this.findOne(userId);
     return await this.userRepository.remove(target)
   }
 }

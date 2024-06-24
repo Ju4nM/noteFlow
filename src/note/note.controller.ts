@@ -1,34 +1,41 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { NoteService } from './note.service';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
+import { Note } from './entities/note.entity';
+import { Request } from 'express';
 
 @Controller('note')
 export class NoteController {
   constructor(private readonly noteService: NoteService) {}
 
   @Post()
-  create(@Body() createNoteDto: CreateNoteDto) {
-    return this.noteService.create(createNoteDto);
+  async create(@Body() createNoteDto: CreateNoteDto, @Req() req: Request): Promise<Note> {
+    const { userId } = req.user as any;
+    return await this.noteService.create(createNoteDto, userId);
   }
 
   @Get()
-  findAll() {
-    return this.noteService.findAll();
+  async findAll(@Req() req: Request): Promise<Note[]> {
+    const { userId } = req.user as any;
+    return await this.noteService.findAll(userId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.noteService.findOne(+id);
+  async findOne(@Param('id') id: string, @Req() req: Request): Promise<Note> {
+    const { userId } = req.user as any;
+    return await this.noteService.findOne(id, userId);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateNoteDto: UpdateNoteDto) {
-    return this.noteService.update(+id, updateNoteDto);
+  async update(@Param('id') id: string, @Body() updateNoteDto: UpdateNoteDto, @Req() req: Request): Promise<Note> {
+  const { userId } = req.user as any;
+    return await this.noteService.update(id, updateNoteDto, userId);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.noteService.remove(+id);
+  async remove(@Param('id') id: string, @Req() req: Request): Promise<Note> {
+    const { userId } = req.user as any;
+    return await this.noteService.remove(id, userId);
   }
 }
