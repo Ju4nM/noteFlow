@@ -22,10 +22,10 @@ export class AuthService {
       }
     });
 
-    if (!target) throw new HttpException("Email y/o contraseña incorrectas", HttpStatus.UNAUTHORIZED);
+    if (!target) throw new HttpException("Email y/o contraseña incorrectos", HttpStatus.UNAUTHORIZED);
 
     const passwordMatching: boolean = await compare(password, target.password);
-    if (!passwordMatching) throw new HttpException("Email y/o contraseña incorrectas", HttpStatus.UNAUTHORIZED);
+    if (!passwordMatching) throw new HttpException("Email y/o contraseña incorrectos", HttpStatus.UNAUTHORIZED);
 
     const accessToken = await this.jwtService.signAsync({ userId: target.id }, { secret: process.env.JWT_SECRET });
 
