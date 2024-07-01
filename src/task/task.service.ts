@@ -20,7 +20,9 @@ export class TaskService {
     const user: User = await this.userService.findOne(userId);
     const newTask: Task = this.taskRepository.create({ ...createTaskDto, user });
 
-    return await this.taskRepository.save(newTask);
+    const taskCreated: Task = await this.taskRepository.save(newTask);
+    delete taskCreated.user;
+    return taskCreated;
   }
 
   async findAll(userId: string): Promise<Task[]> {

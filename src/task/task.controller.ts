@@ -27,16 +27,16 @@ export class TaskController {
     return await this.taskService.findOne(id, userId);
   }
 
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto, @Req() req: Request): Promise<Task> {
-    const { userId } = req.user as any;
-    return await this.taskService.update(id, updateTaskDto, userId);
-  }
-
-  @Patch('/complete/:id')
+  @Patch('complete/:id')
   async toggleComplete(@Param('id') id: string, @Req() req: Request): Promise<Task> {
     const { userId } = req.user as any;
     return await this.taskService.toggleComplete(id, userId);
+  }
+
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto, @Req() req: Request): Promise<Task> {
+    const { userId } = req.user as any;
+    return await this.taskService.update(id, updateTaskDto, userId);
   }
 
   @Delete(':id')

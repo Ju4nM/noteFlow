@@ -19,7 +19,9 @@ export class NoteService {
     const user: User = await this.userService.findOne(userId);
     const newNote: Note = this.noteRepository.create({ ...createNoteDto, user });
 
-    return await this.noteRepository.save(newNote);
+    const noteCreated: Note = await this.noteRepository.save(newNote);
+    delete noteCreated.user;
+    return noteCreated;
   }
 
   async findAll(userId: string): Promise<Note[]> {
