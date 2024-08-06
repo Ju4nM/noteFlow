@@ -1,6 +1,6 @@
 import { Task } from "src/task/entities/task.entity";
 import { User } from "src/user/entities/user.entity";
-import { Column, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Note {
@@ -13,6 +13,9 @@ export class Note {
 
   @Column()
   body: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
 
   @ManyToOne(type => Task, task => task.notes, { nullable: true})
   task?: Task;

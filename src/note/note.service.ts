@@ -30,6 +30,9 @@ export class NoteService {
         user: {
           id: userId
         }
+      },
+      order: {
+        createdAt: "DESC"
       }
     });
 

@@ -31,6 +31,9 @@ export class TaskService {
         user: {
           id: userId
         }
+      },
+      order: {
+        createdAt: "DESC"
       }
     });
     
